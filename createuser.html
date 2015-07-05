@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Create New User</title>    
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="asset/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="asset/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="asset/mainset.css">
+        <script src="asset/bootstrap/js/bootstrap.min.js"></script>
+        <style>
+            .form-create{
+                max-width: 520px;
+                padding: 15px;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <form class="form-horizontal form-create" action="createuser.php" method="post">
+              <div class="form-group">
+                <label for="inputEmail" class="col-sm-3 control-label">Email</label>
+                <div class="col-sm-9">
+                  <input type="email" class="form-control" id="inputEmail" name="inputEmail" placeholder="Email" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputPassword" class="col-sm-3 control-label">Password</label>
+                <div class="col-sm-9">
+                  <input type="password" class="form-control" id="inputPassword" name="inputPassword" placeholder="Password" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputPassword2" class="col-sm-3 control-label">Re-Password</label>
+                <div class="col-sm-9">
+                  <input type="password" class="form-control" id="inputPassword2" name="inputPassword2" placeholder="Re-Password" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputFirstname" class="col-sm-3 control-label">Firstname</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="inputFirstname" name="inputFirstname" placeholder="Firstname" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputLastname" class="col-sm-3 control-label">Lastname</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="inputLastname" name="inputLastname" placeholder="Lastname" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputMiddlename" class="col-sm-3 control-label">Middlename</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="inputMiddlename" name="inputMiddlename" placeholder="Middlename">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputMobileNo" class="col-sm-3 control-label">Mobile Number</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="inputMobileNo" name="inputMobileNo" placeholder="MobileNo." required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="inputPicture" class="col-sm-3 control-label">Picture</label>
+                <div class="col-sm-9">
+                  <input type="file" class="form-control" id="inputPicture" name="inputPicture" accept="image/jpeg" placeholder="select">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9">
+                  <input type="submit" class="btn btn-success" value="Create!">
+                </div>
+              </div>
+            </form>
+        </div><!-- /container -->
+    </body>
+</html>
