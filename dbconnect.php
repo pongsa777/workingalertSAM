@@ -1,11 +1,11 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "workingalert";
-$db = "Workingalert";
+$password = "";
+$db = "workingalert";
 // Create connection
-$conn = new mysqli($servername, $username, $password,$db);
-$conn->set_charset("utf8");
+$con = new mysqli($servername, $username, $password,$db);
+$con->set_charset("utf8");
 if ($con == FALSE ) {
     die("Error : Connection failed: " . mysql_error());
 }

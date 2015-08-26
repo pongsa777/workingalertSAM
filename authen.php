@@ -1,38 +1,46 @@
 <?PHP
-@session_start();
-include_once "connection.php";
+header('Content-Type: application/json');
+include "dbconnect.php";
 
-if (get_magic_quotes_gpc()) {
-    $email = stripslashes($_GET['email']);
-	$pass = stripslashes($_GET['pass']);
-}
-else {
-    $email = addslashes(trim($_GET['email']));
-	$pass = addslashes(trim($_GET['pass']));
-}
-$result = $mysqli->query("SELECT * FROM `user` WHERE email = '". $email ."' AND password = '". $pass ."';");
-$nums = $result->num_rows;
-	if($nums === 1){
-		while ($row = $result->fetch_object()){
-			$data[] = $row;
-		}
-		
-		$session_id = session_id();
-		$user_id = $data[0]->user_id; 
-		echo "<script>('user_id = ". $user_id ."')</script>"; 
-		echo "<script>('json_encode = ". json_encode($data) ."')</script>"; 
-		echo "<script>('session_id = ". $session_id ."')</script>"; 
-		
+$email = $con->real_escape_string($_GET['email']);
+$pass = $con->real_escape_string($_GET['pass']);
+$type = $con->real_escape_string($_GET['type']);
 
-		if($mysqli->query("INSERT INTO `session` (`no`, `user_id`, `session_id`) VALUES (NULL, '". $user_id ."', '". $session_id ."');")){
-			echo "{\"status\":\"success\",\"sessionid\":\""$session_id"\"}";
-		}else{
-			echo "{\"status\":\"failed\"}";
-		}
-	}elseif($nums ===0){
-	echo "{\"status\":\"failed\"}";
-	}else{
-		echo "{\"status\":\"failed\"}";
-	}
+function generateRandomString($length = 48) {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+}
+
+echo $email.' '.$pass.' '.$type;
+$response = array("status"=>"failed","sessionid"=>"");
+$queryUser = $con->query("SELECT * FROM `user` WHERE email = '$email';");
+if($queryUser->num_rows > 0){
+    //found email in user table
+    $userdata = $queryUser->fetch_assoc();
+    if($pass == $userdata["password"]){
+        $tokenid = generateRandomString();
+        $response = array("status"=>"success","sessionid"=>$tokenid);
+        $userid = $userdata["user_id"];
+        $querytoken = $con->query("SELECT * FROM `session` WHERE `user_id` = '$userid';");
+        if($queryUser->num_rows > 0){
+        	//found old session
+        	$con->query("DELETE FROM `workingalert`.`session` WHERE `user_id` = '$userid'");
+        	$con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`) VALUES ('$userid', '$tokenid');");
+        }else{
+        	//first time login
+        	$con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`) VALUES ('$userid', '$tokenid');");
+        }
+    }else{
+        $response = array("status"=>"failed","sessionid"=>"");
+    }
+}
+echo json_encode($response);
+        
+        
 
 ?>
