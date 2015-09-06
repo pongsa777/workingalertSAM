@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "workingalert";
 $db = "workingalert";
 // Create connection
 $con = new mysqli($servername, $username, $password,$db);

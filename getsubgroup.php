@@ -1,8 +1,10 @@
 <?php
 header('Content-Type: application/json');
 include "dbconnect.php";
+include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
+    $groupid = $con->real_escape_string($_GET['groupid']);
 
 $group = array();
 $response = array("status"=>"failed","description"=>"some problems","group"=>$group);
@@ -15,8 +17,7 @@ if($queryUser->num_rows > 0){
         $querygroup = $con->query("SELECT * FROM `has_user` 
                             join `group` on `has_user`.group_id=`group`.group_id 
                             where `has_user`.user_id = '$userid'
-                            AND `group`.`parent_id` is null
-                            OR `group`.`parent_id` = 0;");
+                            AND `group`.`parent_id` = '$groupid';");
         if($querygroup->num_rows > 0){
             //found group
             while($groupdata = $querygroup->fetch_assoc()){
