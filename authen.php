@@ -1,5 +1,5 @@
 <?PHP
-//header('Content-Type: application/json');
+header('Content-Type: application/json');
 include "dbconnect.php";
 
 $email = $con->real_escape_string($_GET['email']);
@@ -36,7 +36,7 @@ if($queryUser->num_rows > 0){
         	$con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`) VALUES ('$userid', '$tokenid');");
         }
     }else{
-        $response = array("status"=>"success","sessionid"=>"");
+        $response = array("status"=>"failed","sessionid"=>"");
     }
 }
 echo json_encode($response);

@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 include "finduserid.php";
 include "push.php";
+include "findchildgroup.php";
 function generateRandomString($length = 10) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
@@ -13,40 +14,72 @@ function generateRandomString($length = 10) {
     return $randomString;
 }
 
-
+    //recieve parameter
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $groupid = $con->real_escape_string($_GET['groupid']);
     $msgpayload = $con->real_escape_string($_GET['msgpayload']);
     $priority = $con->real_escape_string($_GET['priority']);
 
+
 $response = array("status"=>"failed","description"=>"some problems");
+
+//check user id status
 $userid = finduserid($sessionid,$con);
 if($userid != 0){
+    
+    //find all child of groupid
+    $allgroupid = findchildgroup($groupid,$con);
+    
+    //insert ข้อความเข้าตาราง message และดึง id มาเก็บไว้
     $identity = generateRandomString();
-    
-    $queryCreate = $con->query("INSERT INTO  `workingalert`.`message` 
-                                (`message_body` ,`priority` ,`from_user_id` ,`identity`)
-                                VALUES ('$msgpayload',  '$priority',  '$userid', '$identity');");
-    
-    $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message` 
+    $sql = "INSERT INTO  `workingalert`.`message` 
+            (`message_body` ,`priority` ,`from_user_id` ,`identity`)
+            VALUES ('$msgpayload',  '$priority',  '$userid', '$identity');";
+    if($con->query($sql)===TRUE){
+            //query msgid from message table
+            $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message` 
                                 WHERE `from_user_id` = '$userid' 
                                 AND `identity` = '$identity';");
-    $msgiddata = $querymsgid->fetch_assoc();
-    $msgid = $msgiddata["message_id"];
+            $msgiddata = $querymsgid->fetch_assoc();
+            $msgid = $msgiddata["message_id"];
+    }
     
-    $queryinsertmsg = $con->query("INSERT INTO  `workingalert`.`has_message` (
-                                    `group_id` ,`message_id`)
-                                    VALUES ('$groupid',  '$msgid');");
+    $alluserid = array();
+    //loop แต่ละ child หา user id
+    foreach($allgroupid as $eachgroupid){
+        $querymember = $con->query("SELECT `user_id` FROM `has_user` WHERE `has_user`.`group_id` = '$eachgroupid';");
+        if($querymember->num_rows > 0) {
+            $arruserid = array();
+            while($row = $querymember->fetch_assoc()) {
+                array_push($arruserid,$row["user_id"]);
+            }
+            //loop insert ลงตาราง has_message
+            foreach($arruserid as $eachuserid){
+                $sqlinsert = "INSERT INTO  `workingalert`.`has_message` 
+                            (`message_id` ,`user_id` ,`group_id`)
+                            VALUES ('$msgid',  '$eachuserid',  '$eachgroupid');";
+                if($con->query($sqlinsert) === TRUE){
+                    //insert success
+                    //store user_id for send push
+                    array_push($alluserid,$eachuserid);
+                }else {
+                    echo "Error: " . $sql . "<br>" . $conn->error;
+                }
+            }
+        }
+    }
     
-    
-    
-    $queryallDeviceId = $con->query("SELECT * FROM `user_deviceid` JOIN `has_user` ON `user_deviceid`.`user_id` = `has_user`.`user_id` WHERE `has_user`.`group_id` = '$groupid'");
-	if($queryallDeviceId->num_rows > 0){
+    //send push noti to all userid
+    //query all device id
+    $stralluserid = implode(",",$alluserid);
+    $queryallDeviceId = $con->query("SELECT distinct `device_id` FROM `user_deviceid` where `user_id` in ($stralluserid)");
+    if($queryallDeviceId->num_rows > 0){
 	    // output data of each row
 	    $arrayOfDeviceId = array();
  	   while($row = $queryallDeviceId->fetch_assoc()) {
  	       array_push($arrayOfDeviceId,$row['device_id']);
  	   }
+        //find sender name
        $querysendername = $con->query("SELECT * FROM `user` WHERE `user`.`user_id` = '$userid';");
         if($querysendername->num_rows > 0){
             $row = $querysendername->fetch_assoc();
@@ -55,6 +88,7 @@ if($userid != 0){
             $sendername = 'undefind';   
         }
         
+        //prepare data before push
  	   $title = $msgpayload;
  	   $msg = $sendername;
  	   $msgstatus = sendPush($arrayOfDeviceId,$title,$msg);
@@ -62,9 +96,7 @@ if($userid != 0){
 	} else {
  	   $response = array("status"=>"success","description"=>"message create complete","push"=>"send fail");
 	}
-}else{
-    $response = array("status"=>"failed","description"=>"You have no authorize to create group");
-}
-
+    
+}//close check user id 
 echo json_encode($response);
 ?>
