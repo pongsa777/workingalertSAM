@@ -5,23 +5,35 @@ include "finduserid.php";
     
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $messageid = $con->real_escape_string($_GET['messageid']);
+    $groupid = $con->real_escape_string($_GET['groupid']);
 
 $userid = finduserid($sessionid,$con);
+echo $userid;
 $response = array("status"=>"failed","description"=>"missing parameters");
-if($userid != 0){
-    $sqlcheck = "SELECT * FROM `has_read` WHERE `has_read`.`user_id` = '$userid' AND `has_read`.`message_id` = '$messageid';";
+if($userid != 0){ //หาsession
+    
+    $sqlcheck = "SELECT * FROM  `has_message` 
+    WHERE  `user_id` = '$userid'
+    AND  `message_id` = '$messageid' AND  `group_id` = '$groupid'";
     $checkdata = $con->query($sqlcheck);
     if($checkdata->num_rows > 0){
-        $response = array("status"=>"failed","description"=>"already read");
-    }else{
-        $sqlread = "INSERT INTO  `workingalert`.`has_read` (`user_id` ,`message_id`)VALUES ('$userid',  '$messageid');";
-        if($con->query($sqlread)===TRUE){
-            $response = array("status"=>"success","description"=>"read finish");
+        //มี ข้อความนี้ที่ยังไม่ได้อ่านจริง
+        //update
+        $sql = "UPDATE  `workingalert`.`has_message` SET  `read_status` =  'y',
+        `reach_status` =  'y' WHERE  `has_message`.`user_id` = '$userid' 
+        AND `has_message`.`group_id` = '$groupid' 
+        AND `has_message`.`message_id` = '$messageid';";
+        if($con->query($sql)===TRUE){
+            $response = array("status"=>"success","description"=>"update read success");
         }else{
-            $response = array("status"=>"failed","description"=>"insert to db problems");
+            $response = array("status"=>"failed","description"=>"update db error");
         }
+    }else{
+        //ไม่มีข้อความตามเงื่อนไขนี้อยู่ในระบบ
+        $response = array("status"=>"failed","description"=>"not found message in system");
     }
 }else{
+    //หา session ไม่เจอ
     $response = array("status"=>"failed","description"=>"session error");
 }
 

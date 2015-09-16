@@ -26,7 +26,7 @@ if($userid != 0){
     
     //query all message and message data
     $querymsg = $con->query("SELECT DISTINCT  `message`.`message_id` ,  `has_message`.`user_id` ,
-    `group_id` ,  `read_status` ,  `reach_status` , `message`.`message_body` ,  `priority` ,  `message`.`from_user_id` 
+    `group_id` ,  `read_status` ,  `reach_status` , `message`.`message_body` ,  `priority` ,  `message`.`from_user_id` ,`create_date` ,`create_time`
     FROM  `has_message` 
     JOIN  `message` ON  `has_message`.`message_id` =  `message`.`message_id` 
     WHERE  `has_message`.`user_id` = '$userid'
@@ -39,35 +39,48 @@ if($userid != 0){
     $fromid_db = "";
     $read_db = "";
     $reach_db = "";
+    $c_date = "";
+    $c_time = "";
     
     if($querymsg->num_rows > 0){ //check ว่ามี record ออกมารึป่าว
-        while($msgdata = $querymsg->fetch_assoc()){  
+        while($msgdata = $querymsg->fetch_assoc()){
+            $fromid = $msgdata["from_user_id"];
+            $querysendername = $con->query("SELECT CONCAT(`firstname`,' ',`lastname`) 
+            AS name,`picture` FROM `user` WHERE `user_id` = '$fromid';");
+            $sendernamedata = $querysendername->fetch_assoc();
             
             if($checkmsgid == 0){ //ถ้าเข้ามาครั้งแรกเก็บค่าไว้เช็คว่าเป็นตัวเดิมรึป่าว
                 $id_db = $msgdata["message_id"];
                 $body_db = $msgdata["message_body"];
                 $priority_db = $msgdata["priority"];
                 $fromid_db = $msgdata["from_user_id"];
+                $fromname = $sendernamedata["name"];
+                $pict = $sendernamedata["picture"];
                 $read_db = $msgdata["read_status"];
                 $reach_db = $msgdata["reach_status"];
+                $c_date = $msgdata["create_date"];
+                $c_time = $msgdata["create_time"];
                 $checkmsgid = $id_db;
             }   
             
             //check groupid ถ้ายังเหมือนเดิมอยู่ให้ add id กับ path เข้า $groupid
             if($msgdata["message_id"] == $checkmsgid){
                 $groupiddetail = array("id"=>$msgdata["group_id"],"path"=>findparentpath($msgdata["group_id"],$con));
-                echo $msgdata["message_id"].'wwww';
                 array_push($grouppath,$groupiddetail);
             }else{
                 //add element เข้า $msgdetail 
                 $msgdetail = array("id"=>$id_db,
-                               "grouppath"=>$grouppath,
-                               "body"=>$body_db,
-                               "priority"=>$priority_db,
-                               "fromid"=>$fromid_db,
-                               "read"=>$read_db,
-                               "reach"=>$reach_db
-                              );
+                                   "grouppath"=>$grouppath,
+                                   "body"=>$body_db,
+                                   "priority"=>$priority_db,
+                                   "fromid"=>$fromid_db,
+                                   "pict"=>$pict,
+                                   "formname"=>$fromname,      
+                                   "read"=>$read_db,
+                                   "reach"=>$reach_db,
+                                   "date"=>$c_date,
+                                   "time"=>$c_time
+                                  );
                 array_push($msg,$msgdetail);
                 $grouppath = array();
                 //ย้าย id ใหม่ใส่ $checkmsgid
@@ -86,20 +99,27 @@ if($userid != 0){
                 $body_db = $msgdata["message_body"];
                 $priority_db = $msgdata["priority"];
                 $fromid_db = $msgdata["from_user_id"];
+                $fromname = $sendernamedata["name"];
+                $pict = $sendernamedata["picture"];
                 $read_db = $msgdata["read_status"];
                 $reach_db = $msgdata["reach_status"];
+                $c_date = $msgdata["create_date"];
+                $c_time = $msgdata["create_time"];
             }
         }
         
         //หลุด loop แล้วยังต้องเอาค่า id สุดท้ายเก็บลง $msgdetail
         $msgdetail = array("id"=>$id_db,
-                               "grouppath"=>$grouppath,
-                               "body"=>$body_db,
-                               "priority"=>$priority_db,
-                               "fromid"=>$fromid_db,
-                               "read"=>$read_db,
-                               "reach"=>$reach_db
-                              );
+                           "grouppath"=>$grouppath,
+                           "body"=>$body_db,
+                           "priority"=>$priority_db,
+                           "fromid"=>$fromid_db,
+                           "pict"=>$pict,
+                           "formname"=>$fromname,
+                           "read"=>$read_db,
+                           "reach"=>$reach_db,
+                           "date"=>$c_date,
+                           "time"=>$c_time);
                 array_push($msg,$msgdetail);
         
         $response = array("status"=>"success","description"=>"all data","message"=>$msg);

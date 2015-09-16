@@ -32,9 +32,11 @@ if($userid != 0){
     
     //insert ข้อความเข้าตาราง message และดึง id มาเก็บไว้
     $identity = generateRandomString();
+    $c_date = date("Y-m-d");
+    $c_time = date("h:i:sa");
     $sql = "INSERT INTO  `workingalert`.`message` 
-            (`message_body` ,`priority` ,`from_user_id` ,`identity`)
-            VALUES ('$msgpayload',  '$priority',  '$userid', '$identity');";
+            (`message_body` ,`priority` ,`from_user_id` ,`identity` ,`create_date` ,`create_time`)
+            VALUES ('$msgpayload',  '$priority',  '$userid', '$identity', '$c_date', '$c_time');";
     if($con->query($sql)===TRUE){
             //query msgid from message table
             $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message` 
