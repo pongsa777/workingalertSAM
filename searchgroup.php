@@ -11,7 +11,9 @@ if($userid == 0){
 	$response = array("status"=>"failed","description"=>"you are not authorize to use this function","data"=>$data);	
 }else{
 	$data = array();
-    $que = "SELECT * FROM `group` WHERE `group`.`group_name` like '%$searchmsg%' AND `group`.`parent_id` = 0 LIMIT 0 , 30;";
+    $que = "SELECT * FROM  `group` WHERE `group`.`parent_id` = 0 AND `group`.`group_name` like '%$searchmsg%'
+			AND  `group`.`group_id` NOT IN (SELECT  `has_user`.`group_id` 
+											FROM  `has_user` WHERE  `has_user`.`user_id` = '$userid') LIMIT 0 , 30";
 	$querygroup = $con->query($que);
 	if($querygroup->num_rows > 0){
 		while($groupdata = $querygroup->fetch_assoc()){

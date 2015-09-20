@@ -26,26 +26,26 @@ $response = array("status"=>"failed","description"=>"some problems");
 //check user id status
 $userid = finduserid($sessionid,$con);
 if($userid != 0){
-    
+
     //find all child of groupid
     $allgroupid = findchildgroup($groupid,$con);
-    
+
     //insert ข้อความเข้าตาราง message และดึง id มาเก็บไว้
     $identity = generateRandomString();
     $c_date = date("Y-m-d");
     $c_time = date("h:i:sa");
-    $sql = "INSERT INTO  `workingalert`.`message` 
+    $sql = "INSERT INTO  `workingalert`.`message`
             (`message_body` ,`priority` ,`from_user_id` ,`identity` ,`create_date` ,`create_time`)
             VALUES ('$msgpayload',  '$priority',  '$userid', '$identity', '$c_date', '$c_time');";
     if($con->query($sql)===TRUE){
             //query msgid from message table
-            $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message` 
-                                WHERE `from_user_id` = '$userid' 
+            $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message`
+                                WHERE `from_user_id` = '$userid'
                                 AND `identity` = '$identity';");
             $msgiddata = $querymsgid->fetch_assoc();
             $msgid = $msgiddata["message_id"];
     }
-    
+
     $alluserid = array();
     //loop แต่ละ child หา user id
     foreach($allgroupid as $eachgroupid){
@@ -57,7 +57,7 @@ if($userid != 0){
             }
             //loop insert ลงตาราง has_message
             foreach($arruserid as $eachuserid){
-                $sqlinsert = "INSERT INTO  `workingalert`.`has_message` 
+                $sqlinsert = "INSERT INTO  `workingalert`.`has_message`
                             (`message_id` ,`user_id` ,`group_id`)
                             VALUES ('$msgid',  '$eachuserid',  '$eachgroupid');";
                 if($con->query($sqlinsert) === TRUE){
@@ -70,7 +70,7 @@ if($userid != 0){
             }
         }
     }
-    
+
     //send push noti to all userid
     //query all device id
     $stralluserid = implode(",",$alluserid);
@@ -87,18 +87,25 @@ if($userid != 0){
             $row = $querysendername->fetch_assoc();
             $sendername = $row['nickname'];
         }else{
-            $sendername = 'undefind';   
+            $sendername = 'undefind';
         }
-        
+
         //prepare data before push
  	   $title = $msgpayload;
  	   $msg = $sendername;
  	   $msgstatus = sendPush($arrayOfDeviceId,$title,$msg);
- 	   $response = array("status"=>"success","description"=>"message create complete","push"=>$msgstatus);
+
+     if($con->query("UPDATE  `workingalert`.`has_message` SET  `read_status` =  'y',
+     `reach_status` =  'y' WHERE  `has_message`.`user_id` = '$userid'
+     AND `has_message`.`message_id` = '$msgid';") === TRUE){
+     $response = array("status"=>"success","description"=>"message create complete","push"=>$msgstatus);
+   }else{
+     $response = array("status"=>"success","description"=>"message create complete but still not read","push"=>$msgstatus);
+   }
 	} else {
  	   $response = array("status"=>"success","description"=>"message create complete","push"=>"send fail");
 	}
-    
-}//close check user id 
+
+}//close check user id
 echo json_encode($response);
 ?>
