@@ -4,7 +4,6 @@ include_once "connection.php";
 
 $email = $mysqli->real_escape_string($_GET['email']);
 
-
 $result = $mysqli->query("SELECT * FROM `user` WHERE email = '". $email ."'");
 $nums = $result->num_rows;
 	if($nums === 1){

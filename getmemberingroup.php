@@ -5,10 +5,12 @@ include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $groupid = $con->real_escape_string($_GET['groupid']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 $user = array();
 $response = array("status"=>"failed","description"=>"some problems","user"=>$user);
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 
 
 if($userid != 0){

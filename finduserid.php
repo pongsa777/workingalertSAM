@@ -1,7 +1,7 @@
 <?php
-function finduserid($token,$con){
+function finduserid($token,$con,$type){
     $userid = 0;
-    $queryUser = $con->query("SELECT * FROM `session` WHERE `session_id` = '$token';");
+    $queryUser = $con->query("SELECT * FROM `session` WHERE `session_id` = '$token' AND `type` = '$type';");
     if($queryUser->num_rows > 0){
         //found user_id
         $userdata = $queryUser->fetch_assoc();

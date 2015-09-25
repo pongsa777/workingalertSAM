@@ -4,6 +4,8 @@ include "dbconnect.php";
 include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 function findparentpath($groupid,$con){
     $path = "";
@@ -21,7 +23,7 @@ function findparentpath($groupid,$con){
 
 $msg = array();
 $response = array("status"=>"failed","description"=>"some problems","message"=>$msg);
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
 
     //query all message and message data

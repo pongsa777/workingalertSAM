@@ -5,11 +5,13 @@ include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $groupid = $con->real_escape_string($_GET['groupid']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 $msg = array();
 $groupname = "";
 $response = array("status"=>"failed","description"=>"some problems","message"=>$msg,"groupname"=>$groupname);
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
 
     //query all message and message data

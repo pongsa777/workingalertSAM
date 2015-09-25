@@ -3,6 +3,8 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 
 $fbid = $con->real_escape_string($_GET['fbid']);
+$type = $con->real_escape_string($_GET['type']);
+
 
 function generateRandomString($length = 48) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -29,15 +31,15 @@ if($fbid == ""){
             if($queryUser->num_rows > 0){
                 //found old session
                 $con->query("DELETE FROM `workingalert`.`session` WHERE `user_id` = '$userid'");
-                $con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`) VALUES ('$userid', '$tokenid');");
+                $con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`,`type`) VALUES ('$userid', '$tokenid', '$type');");
             }else{
                 //first time login
-                $con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`) VALUES ('$userid', '$tokenid');");
+                $con->query("INSERT INTO `workingalert`.`session` (`user_id`, `session_id`,`type`) VALUES ('$userid', '$tokenid', '$type');");
             }
     }
 }
 echo json_encode($response);
-        
-        
+
+
 
 ?>

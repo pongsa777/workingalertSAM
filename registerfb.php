@@ -8,7 +8,6 @@ include "dbconnect.php";
     $lastname = $con->real_escape_string($_GET['lastname']);
     $nickname = $con->real_escape_string($_GET['nickname']);
     $phone = $con->real_escape_string($_GET['phone']);
-    
 
 
 if($email == "" | $fbid == "0" | $phone == "0"){
@@ -18,10 +17,10 @@ if($email == "" | $fbid == "0" | $phone == "0"){
     if($queryUser->num_rows > 0){
        $response = array("status"=>"failed","description"=>"account has already registered");
     }else{
-        $sql = "INSERT INTO `workingalert`.`user` 
-        (`facebook_id`, `email`, `firstname`, `lastname`, `nickname`, `phone`) 
+        $sql = "INSERT INTO `workingalert`.`user`
+        (`facebook_id`, `email`, `firstname`, `lastname`, `nickname`, `phone`)
         VALUES ('$fbid','$email','$firstname','$lastname','$nickname','$phone');";
-        
+
         if($con->query($sql)===true){
             $response = array("status"=>"success","description"=>"account register successfully");
         }else{

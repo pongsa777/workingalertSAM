@@ -6,8 +6,10 @@ $response = array("status"=>"failed","description"=>"Not found user id in table"
 
 	$sessionid = $con->real_escape_string($_GET['sessionid']);
 	$pushid = $con->real_escape_string($_GET['pushid']);
+	$type = $con->real_escape_string($_GET['type']);
 
-	$userid = finduserid($sessionid,$con);
+
+	$userid = finduserid($sessionid,$con,$type);
 
 	$queryUser = $con->query("SELECT * FROM `workingalert`.`user_deviceid` WHERE `user_id` = '$userid';");
 	if($queryUser->num_rows > 0){

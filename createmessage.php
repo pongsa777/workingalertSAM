@@ -19,12 +19,13 @@ function generateRandomString($length = 10) {
     $groupid = $con->real_escape_string($_GET['groupid']);
     $msgpayload = $con->real_escape_string($_GET['msgpayload']);
     $priority = $con->real_escape_string($_GET['priority']);
+    $type = $con->real_escape_string($_GET['type']);
 
 
 $response = array("status"=>"failed","description"=>"some problems");
 
 //check user id status
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
 
     //find all child of groupid

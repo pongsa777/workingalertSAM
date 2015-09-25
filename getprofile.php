@@ -4,10 +4,12 @@ include "dbconnect.php";
 include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 $user = array();
 $response = array("status"=>"failed","description"=>"some problems","user"=>$user);
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 
 if($userid != 0){
     $queryprofile = $con->query("SELECT * FROM  `user` WHERE `user`.`user_id` = '$userid'");

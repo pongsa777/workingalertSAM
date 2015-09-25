@@ -5,11 +5,13 @@ include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $groupid = $con->real_escape_string($_GET['groupid']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 $group = array();
 $grouptojoin = array();
 $response = array("status"=>"failed","description"=>"some problems","group"=>$group,"parentname"=>"");
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
     //found user_id
     $queryparentname = $con->query("SELECT `group_name` FROM `group` WHERE `group`.`group_id` = '$groupid'");

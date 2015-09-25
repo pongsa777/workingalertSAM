@@ -10,13 +10,15 @@ include "finduserid.php";
     $enddate = $con->real_escape_string($_GET['enddate']);
     $description = $con->real_escape_string($_GET['description']);
     $password = $con->real_escape_string($_GET['password']);
+    $type = $con->real_escape_string($_GET['type']);
+
 
 if($parentid == "null"){
 	$parentid = null;
 }
 
 $response = array("status"=>"failed","description"=>"some problems");
-$userid = finduserid($sessionid,$con);
+$userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
     $queryCreate = $con->query("INSERT INTO `workingalert`.`group` (`group_name`,`description`,`start_date`,`end_date`,`create_user_id`,`parent_id`,`password`) 
     VALUES ('$groupname', '$description', '$startdate', '$enddate', '$userid', '$parentgroupid', '$password');");

@@ -5,8 +5,11 @@ include "finduserid.php";
 
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $messageid = $con->real_escape_string($_GET['messageid']);
+    $type = $con->real_escape_string($_GET['type']);
 
-$userid = finduserid($sessionid,$con);
+
+$userid = finduserid($sessionid,$con,$type);
+
 $response = array("status"=>"failed","description"=>"missing parameters");
 if($userid != 0){ //หาsession
 
