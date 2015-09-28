@@ -38,7 +38,7 @@ include "finduserid.php";
       $userunread = $con->query("SELECT DISTINCT `message_id`, `has_message`.`user_id`,
           `read_status`, `email`, `firstname`, `lastname`, `nickname`, `phone`, `picture`
           FROM `has_message` JOIN  `user` ON  `has_message`.`user_id` =  `user`.`user_id`
-          WHERE `message_id` = '$msgid' `read_status` IS NULL;"); //หา user ที่ยังไม่ได้อ่าน
+          WHERE `message_id` = '$msgid' AND (`read_status` IS NULL OR `read_status` = 'N' OR `read_status` = '');"); //หา user ที่ยังไม่ได้อ่าน
 
       if($userunread->num_rows > 0){
         while($row2 = $userunread->fetch_assoc()){
