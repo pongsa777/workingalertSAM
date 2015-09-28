@@ -14,7 +14,10 @@ include "finduserid.php";
   $unreadmember = array();
 
   if($userid != 0){ //เชคว่า user มีอยู่จริง
-    $userread = $con->query("SELECT * FROM `has_message` JOIN  `user` ON  `has_message`.`user_id` =  `user`.`user_id` WHERE `message_id` = '$msgid' AND `read_status` IN ('y','Y');"); //หา user ที่อ่านแล้ว
+    $userread = $con->query("SELECT DISTINCT `message_id`, `has_message`.`user_id`,
+        `read_status`, `email`, `firstname`, `lastname`, `nickname`, `phone`, `picture`
+        FROM `has_message` JOIN  `user` ON  `has_message`.`user_id` =  `user`.`user_id`
+        WHERE `message_id` = '$msgid' AND `read_status` IN ('y','Y')"); //หา user ที่อ่านแล้ว
     if($userread->num_rows > 0){
       while($row = $userread->fetch_assoc()){
         $userdetail = array("id"=>$row["user_id"],
@@ -32,10 +35,10 @@ include "finduserid.php";
       }
     }
 
-      $userunread = $con->query("SELECT * FROM `has_message`
-                                  JOIN `user` ON `has_message`.`user_id` = `user`.`user_id`
-                                  WHERE  `message_id` = '$msgid'
-                                  AND `read_status` IS NULL;"); //หา user ที่ยังไม่ได้อ่าน
+      $userunread = $con->query("SELECT DISTINCT `message_id`, `has_message`.`user_id`,
+          `read_status`, `email`, `firstname`, `lastname`, `nickname`, `phone`, `picture`
+          FROM `has_message` JOIN  `user` ON  `has_message`.`user_id` =  `user`.`user_id`
+          WHERE `message_id` = '$msgid' `read_status` IS NULL;"); //หา user ที่ยังไม่ได้อ่าน
 
       if($userunread->num_rows > 0){
         while($row2 = $userunread->fetch_assoc()){

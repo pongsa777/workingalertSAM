@@ -5,23 +5,22 @@ include "dbconnect.php";
 include "finduserid.php";
 
 $sessionid = $con->real_escape_string($_GET['sessionid']);
-$group_id = $con->real_escape_string($_GET['group_id']);
+$groupid = $con->real_escape_string($_GET['groupid']);
 $type = $con->real_escape_string($_GET['type']);
 
-$response = array("status"=>"failed","comment"=>"some problems");
+$response = array("status"=>"failed","description"=>"some problems");
 $userid = finduserid($sessionid,$con,$type);
 
 
 
 if($userid != 0){
-	$con->query("DELETE FROM `group` WHERE `group_id` = '$group_id';");
-
-
+	if($con->query("DELETE FROM `workingalert`.`group` WHERE `group`.`group_id` = '$groupid'")==true){
 		$response = array("status"=>"success","description"=>"delete success");
-
-
 	}else{
-		$response = array("status"=>"failed","description"=>"not have permission");
+		$response = array("status"=>"failed","description"=>"delete row not complete");
 	}
+}else{
+	$response = array("status"=>"failed","description"=>"not have permission");
+}
 echo json_encode($response);
 ?>
