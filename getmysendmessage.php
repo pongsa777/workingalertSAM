@@ -10,10 +10,24 @@ $msg = array();
 $response = array("status"=>"failed","description"=>"some problems","message"=>$msg);
 $userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
-  $sql_allmsg = "SELECT * FROM  `message`
+  $sql_allmsg = "SELECT distinct `has_message`.`pathmsg`,
+                  `has_message`.`message_id`,
+                  `has_message`.`group_id`,
+                  `has_message`.`reach_status`,
+                  `has_message`.`read_status`,
+                  `has_message`.`user_id`,
+                  `message`.`create_date`,
+                  `message`.`create_time`,
+                  `message`.`from_user_id`,
+                  `message`.`identity`,
+                  `message`.`message_body`,
+                  `message`.`priority`,
+                  `message`.`to_groupid`,
+                  `message`.`to_groupname`
+                  FROM  `message`
                   JOIN  `has_message` ON  `has_message`.`message_id` =  `message`.`message_id`
                   WHERE  `message`.`from_user_id` = '$userid'
-                  ORDER BY  `message`.`message_id` DESC";
+                  ORDER BY  `message`.`message_id` DESC, LENGTH(  `has_message`.`pathmsg` ) ";
   $queryallmsg = $con->query($sql_allmsg);
   $checkmsgid = 0;
   $grouppath = array();
@@ -25,6 +39,8 @@ if($userid != 0){
   $reach_db = "";
   $c_date = "";
   $c_time = "";
+  $to_groupid = "";
+  $to_groupname = "";
 
   if($queryallmsg->num_rows > 0){ //check ว่ามี record ออกมารึป่าว
       while($msgdata = $queryallmsg->fetch_assoc()){
@@ -44,6 +60,8 @@ if($userid != 0){
               $reach_db = $msgdata["reach_status"];
               $c_date = $msgdata["create_date"];
               $c_time = $msgdata["create_time"];
+              $to_groupid = $msgdata["to_groupid"];
+              $to_groupname = $msgdata["to_groupname"];
               $checkmsgid = $id_db;
           }
 
@@ -63,7 +81,9 @@ if($userid != 0){
                                  "read"=>$read_db,
                                  "reach"=>$reach_db,
                                  "date"=>$c_date,
-                                 "time"=>$c_time
+                                 "time"=>$c_time,
+                                 "to_id"=>$to_groupid,
+                                 "to_name"=>$to_groupname
                                 );
               array_push($msg,$msgdetail);
               $grouppath = array();
@@ -89,6 +109,8 @@ if($userid != 0){
               $reach_db = $msgdata["reach_status"];
               $c_date = $msgdata["create_date"];
               $c_time = $msgdata["create_time"];
+              $to_groupid = $msgdata["to_groupid"];
+              $to_groupname = $msgdata["to_groupname"];
           }
       }
 
@@ -103,7 +125,10 @@ if($userid != 0){
                          "read"=>$read_db,
                          "reach"=>$reach_db,
                          "date"=>$c_date,
-                         "time"=>$c_time);
+                         "time"=>$c_time,
+                         "to_id"=>$to_groupid,
+                         "to_name"=>$to_groupname
+                       );
               array_push($msg,$msgdetail);
 
       $response = array("status"=>"success","description"=>"all data","message"=>$msg);

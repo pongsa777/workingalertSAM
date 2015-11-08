@@ -25,14 +25,26 @@ $msg = array();
 $response = array("status"=>"failed","description"=>"some problems","message"=>$msg);
 $userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
-
     //query all message and message data
-    $querymsg = $con->query("SELECT DISTINCT  `message`.`message_id` ,  `has_message`.`user_id` ,
-    `group_id` ,  `read_status` ,  `reach_status` , `message`.`message_body` ,  `priority` ,  `message`.`from_user_id` ,`create_date` ,`create_time`
+    $querymsg = $con->query("SELECT distinct `has_message`.`pathmsg`,
+    `has_message`.`message_id`,
+    `has_message`.`group_id`,
+    `has_message`.`reach_status`,
+    `has_message`.`read_status`,
+    `has_message`.`user_id`,
+    `message`.`create_date`,
+    `message`.`create_time`,
+    `message`.`from_user_id`,
+    `message`.`identity`,
+    `message`.`message_body`,
+    `message`.`priority`,
+    `message`.`to_groupid`,
+    `message`.`to_groupname`
     FROM  `has_message`
     JOIN  `message` ON  `has_message`.`message_id` =  `message`.`message_id`
-    WHERE  `has_message`.`user_id` = '$userid'
-    ORDER BY  `message`.`message_id` DESC");
+    WHERE  `has_message`.`user_id` = '5'
+    ORDER BY  `message`.`message_id` DESC, CHAR_LENGTH(`has_message`.`pathmsg`)
+	");
     $checkmsgid = 0;
     $grouppath = array();
     $id_db = "";
