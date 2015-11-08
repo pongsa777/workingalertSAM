@@ -21,8 +21,7 @@ if($userid != 0){ //found user id
                 JOIN `user_deviceid`
                 ON `has_message`.`user_id`=`user_deviceid`.`user_id`
                 WHERE `has_message`.`message_id` = '$msgid'
-                AND `has_message`.`read_status` = 'N'
-                ORDER BY `has_message`.`message_id` DESC";
+                AND `has_message`.`read_status` = 'N' ";         
   $userunread = $con->query($sqlunread);
   if($userunread->num_rows > 0){
     while($row = $userunread->fetch_assoc()){
