@@ -3,6 +3,16 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 include "finduserid.php";
 
+function checkalreadyadd($con,$userid,$attrid){
+  $sqlcheckalreadyadd = "SELECT * FROM `has_attribute` where `user_id` = '$userid' and `attr_id` = '$attrid'";
+  $querycheckaladd = $con->query($sqlcheckalreadyadd);
+  if($querycheckaladd->num_rows > 0){
+    return 1;
+  }else{
+    return 0;
+  }
+}
+
 $sessionid = $con->real_escape_string($_GET['sessionid']);
 $type = $con->real_escape_string($_GET['type']);
 $searchmsg = $con->real_escape_string($_GET['searchmsg']);
@@ -22,7 +32,8 @@ if($userid != 0){
                           "attr_id"=>$row["attr_id"],
                           "attr_name"=>$row["attr_name"],
                           "create_date"=>$row["create_date"],
-                          "create_id"=>$row['create_id']
+                          "create_id"=>$row['create_id'],
+                          "add_status"=> checkalreadyadd($con,$userid,$row["attr_id"])
                           );
         array_push($result,$eachattr);
       }

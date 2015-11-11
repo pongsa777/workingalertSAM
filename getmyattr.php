@@ -10,14 +10,16 @@ $attribute = array();
 $response = array("status"=>"failed","description"=>"some problems");
 $userid = finduserid($sessionid,$con,$type);
 if($userid != 0){//ถ้าเจอ userid
-  $sqlgetgroup = "SELECT * FROM `has_attribute`
+  $sqlgetgroup = "SELECT * FROM `has_attribute` left join `attribute`
+                  ON `has_attribute`.`attr_id` = `attribute`.`attr_id`
                   WHERE `has_attribute`.`user_id` = '$userid'";
   $queryattr = $con->query($sqlgetgroup);
   if($queryattr->num_rows > 0){
     while($row = $queryattr->fetch_assoc()){
       $eachattr = array(
                         "attr_id"=>$row["attr_id"],
-                        "user_id"=>$row["user_id"]
+                        "attr_name"=>$row["attr_name"],
+                        "add_date"=>$row["add_date"]
                         );
       array_push($attribute,$eachattr);
     }
