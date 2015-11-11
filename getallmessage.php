@@ -20,6 +20,20 @@ function findparentpath($groupid,$con){
     return substr($path,0,-3);
 }
 
+function getgrouppict($con,$groupid){
+  $sqlgetpict = "SELECT  `icon` FROM  `group` WHERE  `group_id` =  '$groupid'";
+  $querygetpict = $con->query($sqlgetpict);
+  if($querygetpict ->num_rows >0){
+    $row = $querygetpict->fetch_assoc();
+    if($row['icon'] != ""){
+      return $row['icon'];
+    }else {
+      return "NULL";
+    }
+  }
+  return "NULL";
+}
+
 
 $msg = array();
 $response = array("status"=>"failed","description"=>"some problems","message"=>$msg);
@@ -56,6 +70,7 @@ if($userid != 0){
     $c_date = "";
     $c_time = "";
 
+
     if($querymsg->num_rows > 0){ //check ว่ามี record ออกมารึป่าว
         while($msgdata = $querymsg->fetch_assoc()){
             $fromid = $msgdata["from_user_id"];
@@ -79,7 +94,11 @@ if($userid != 0){
 
             //check groupid ถ้ายังเหมือนเดิมอยู่ให้ add id กับ path เข้า $groupid
             if($msgdata["message_id"] == $checkmsgid){
-                $groupiddetail = array("id"=>$msgdata["group_id"],"path"=>findparentpath($msgdata["group_id"],$con));
+                $groupiddetail = array(
+                                        "id"=>$msgdata["group_id"],
+                                        "path"=>findparentpath($msgdata["group_id"],$con),
+                                        "pict"=>getgrouppict($con,$msgdata["group_id"])
+                                      );
                 array_push($grouppath,$groupiddetail);
             }else{
                 //add element เข้า $msgdetail
@@ -105,7 +124,12 @@ if($userid != 0){
 
                 //หา path ใส่ $groupid
                 $path = findparentpath($msgdata["group_id"],$con);
-                $groupiddetail = array("id"=>$msgdata["group_id"],"path"=>$path);
+                $pixx = getgrouppict($con,$msgdata["group_id"]);
+                $groupiddetail = array(
+                                        "id"=>$msgdata["group_id"],
+                                        "path"=>$path,
+                                        "pict"=>$pixx
+                                      );
                 array_push($grouppath,$groupiddetail);
 
                 //get all rows from db to ตัวแปรใน php

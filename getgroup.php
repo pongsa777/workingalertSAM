@@ -7,19 +7,17 @@ include "finduserid.php";
     $type = $con->real_escape_string($_GET['type']);
 
     function findparentpath($groupid,$con){
-          $path = array();
-    	    //$path = "";
-    	    $parent = 0;
-    	    do{
-    	        $queryparent = $con->query("SELECT `parent_id`,`group_name` FROM `group` WHERE `group_id` ='$groupid';");
-    	        $parentdata = $queryparent->fetch_assoc();
-    	        $parent = $parentdata['parent_id'];
-    	        $groupid = $parent;
-    	        //$path = $parentdata['group_name'].' -> '.$path;
-              array_push($path,$parentdata['group_name']);
-    	    }while($parent != 0);
-    	    //return substr($path,0,-3);
-          return $path;
+    	  $path = array();
+        $parent = 0;
+        do{
+    		    $queryparent = $con->query("SELECT `parent_id`,`group_name` FROM `group` WHERE `group_id` ='$groupid';");
+    		    $parentdata = $queryparent->fetch_assoc();
+    		    $parent = $parentdata['parent_id'];
+    	      $groupid = $parent;
+    	      // $path = $parentdata['group_name'].' -> '.$path;
+    	      array_push($path,$parentdata['group_name']);
+    	  }while($parent != 0);
+    	  return array_reverse($path);
     }
 
     function countunreadmsg($groupid,$userid,$con){
@@ -50,7 +48,7 @@ if($userid != 0){
             $groupdetail = array("id"          => $groupdata["group_id"],
                                   "name"       => $groupdata["group_name"],
                                   "description"=> $groupdata["description"],
-                                  "date"       => $groupdata["end_date"],
+                                  "pict"       => $groupdata["icon"],
                                   "role"       => $groupdata["role_id"],
                                   "path"       => $path,
                                   "unreadmsg"  => $unread

@@ -55,39 +55,141 @@ function createmessage($msgpayload,$priority,$userid,$con){
   }
 }
 
+function attrin($con,$tempuserid,$attrin){
+  if(count($attrin)!=0){
+    $str_attr = implode(",",$attrin);
+    $str_tempuserid = "";
+    $count_array = count($tempuserid);
+    for($i = 0 ; $i < $count_array ; $i++){
+      if($i == 0){
+        $str_tempuserid = $tempuserid[$i]['id'];
+      }else {
+        $str_tempuserid = ','+$tempuserid[$i]['id'];
+      }
+    }
+    $useridin = array();
+    $sqlattrinuser = "SELECT * FROM `has_attribute` WHERE `attr_id` IN ($str_attr) AND `user_id` IN ($str_tempuserid)";
+    $queryalluser = $con->query($sqlattrinuser);
+    if ($queryalluser -> num_rows > 0){
+      while ($roo2 = $queryalluser->fetch_assoc()) {
+        array_push($useridin,$roo2['user_id']);
+      }
+    }
+    //remove user ที่ไม่มีไอดีตามที่กำหนดไว้
+    $count_array = count($tempuserid);
+    for($i=0 ; $i<$count_array ; $i++) {
+      $status = "del";
+      foreach ($useridin as $keyin) {
+        if( $tempuserid[$i]["id"] ==  $keyin){
+          $status = "notdel";
+        }
+      }
+      if($status == "del"){
+        unset($tempuserid[$i]);
+      }
+    }
+  }
+  return $tempuserid;
+}
+
+function attrnot($con,$tempuserid,$attrnot){
+  if(count($attrnot)!=0){
+    $str_attrnot = implode(",",$attrnot);
+    $str_tempuserid = "";
+    $count_array = count($tempuserid);
+    for($i = 0 ; $i < $count_array ; $i++){
+      if($i == 0){
+        $str_tempuserid = $tempuserid[$i]['id'];
+      }else {
+        $str_tempuserid = ','+$tempuserid[$i]['id'];
+      }
+    }
+    $useridnot = array();
+    $sqlattrinuser = "SELECT * FROM `has_attribute` WHERE `attr_id` IN ($str_attrnot) AND `user_id` IN ($str_tempuserid)";
+
+    $queryalluser = $con->query($sqlattrinuser);
+    if ($queryalluser -> num_rows > 0){
+      while ($roo2 = $queryalluser->fetch_assoc()) {
+        array_push($useridnot,$roo2['user_id']);
+      }
+    }
+    //remove user ที่ไม่มีไอดีตามที่กำหนดไว้
+    $count_array = count($tempuserid);
+    for($i=0 ; $i<$count_array ; $i++) {
+      $status = "del";
+      foreach ($useridnot as $keynot) {
+        if( $tempuserid[$i]["id"] ==  $keynot){
+          unset($tempuserid[$i]);
+        }
+      }
+    }
+  }
+  return $tempuserid;
+}
+
 function findAllDestinationUserId($con,$groupid,$attrin,$attrnot,$msgid){
   $result = array();
   $allgroupid = findallchild($groupid,$con);
+  $tempuserid = array();
 
   foreach ($allgroupid as $eachgroupid) { //loop เอาค่าแต่ละตัวในอาเรย์ allgroupid
-    $strattrin = implode(",",$attrin);
-    $strattrnot = implode(",",$attrnot);
-    $tempuserid = array();
-    $sqlgetalluserid = "SELECT `has_user`.`user_id` FROM `has_user` JOIN `has_attribute`
-                        ON `has_user`.`user_id` = `has_attribute`.`user_id`
+    $sqlgetalluserid = "SELECT `has_user`.`user_id` FROM `has_user`
                         WHERE `has_user`.`group_id` = '$eachgroupid'
-                        AND `has_user`.`role_id` != '0'
-                        AND `has_attribute`.`attr_id` IN ($strattrin)
-                        AND `has_attribute`.`user_id` NOT IN
-                        (SELECT `has_attribute`.`user_id`
-                          FROM `has_attribute`
-                          WHERE `has_attribute`.`attr_id` IN ($strattrnot))";
+                        AND `has_user`.`role_id` != '0'";
     $queryallId = $con->query($sqlgetalluserid);
     if($queryallId->num_rows > 0){
+      //ใส่ userid ทั้งหมดลงใน $tempuserid
       while ($roo = $queryallId->fetch_assoc()) {
-        array_push($tempuserid,$roo['user_id']);
+        $eachuserquery = array(
+                                "id"=>$roo['user_id'],
+                                "group"=>$eachgroupid
+                              );
+        array_push($tempuserid,$eachuserquery);
       }
+    }
+  }
 
-      $pathmsg = findparentpath($eachgroupid,$con); //
-      foreach ($tempuserid as $eachuserid) {
-        $sqlinserthasmessage = "INSERT INTO  `workingalert`.`has_message`
-                    (`message_id` ,`user_id` ,`group_id`,`pathmsg`)
-                    VALUES ('$msgid',  '$eachuserid',  '$eachgroupid', '$pathmsg');";
-        if($con->query($sqlinserthasmessage)===TRUE){
-          //insert ลงตารางสำเร็จก็เก็บ user id ไว้ push
-          array_push($result,$eachuserid);
-        }
-      }
+  // เลือกเอาเฉพาะ user ที่มี attr ที่กำหนด
+  $tempuserid2 = attrin($con,$tempuserid,$attrin);
+  // print_r($tempuserid2);
+  //re index array ใหม่่
+  if( count($tempuserid2) != 0 ){
+    $tempuserid = array();
+    foreach ($tempuserid2 as $key) {
+      array_push($tempuserid,$key);
+    }
+  }else{
+    $tempuserid = $tempuserid2;
+  }
+
+  //remove user ที่กำหนดไว้
+  $tempuserid2 = attrnot($con,$tempuserid,$attrnot);
+  if( count($tempuserid2) != 0 ){
+    $tempuserid = array();
+    foreach ($tempuserid2 as $key) {
+      array_push($tempuserid,$key);
+    }
+  }else{
+    $tempuserid = $tempuserid2;
+  }
+
+  //insert to db
+  $useridforpush = insert_hasmessage($con,$tempuserid,$msgid);
+  $useridforpush = array_unique($useridforpush);
+  return $useridforpush;
+}
+
+function insert_hasmessage($con,$userdest,$msgid){
+  $result = array();
+  foreach ($userdest as $key) {
+    $pathmsg = findparentpath($key['group'],$con);
+    $u_id = $key["id"];
+    $u_group = $key["group"];
+    $sqlinserthasmessage = "INSERT INTO  `workingalert`.`has_message`
+                (`message_id` ,`user_id` ,`group_id`,`pathmsg`)
+                VALUES ('$msgid',  '$u_id',  '$u_group', '$pathmsg');";
+    if($con->query($sqlinserthasmessage)){
+      array_push($result,$key['id']);
     }
   }
   return $result;
@@ -153,13 +255,14 @@ if($userid != 0){
     $querycheckgroup = $con->query($sqlccheckgroup);
     if($querycheckgroup ->num_rows > 0 ){
       while ($row = $querycheckgroup->fetch_assoc()) {
-        if($row['permission'] == '1'){ //everyone can send
+        if($row['permission'] == '1' || $row['permission'] == NULL){ //everyone can send
            $msgid = createmessage($msgpayload,$priority,$userid,$con);
            if($msgid == 0){
              $response = array("status"=>"failed","description"=>"insert messege to db failed");
            }else{
              //หาคนที่จะถูกส่งไปถึงทั้งหมด
              $alluserid = findAllDestinationUserId($con,$groupid,$attrin,$attrnot,$msgid);
+             //  print_r($alluserid);
              //ไปส่ง push
              $pushresult = prepareAndPush($con,$alluserid,$userid,$msgpayload);
              //update reach+read ของคนส่ง
@@ -195,7 +298,6 @@ if($userid != 0){
           $response = array("status"=>"failed","description"=>"invalid group permission");
         }
       }
-      //ใส่ข้อความลง db แล้วเอาตัวแปร message id มาเก็บไว้ชื่อ $msgid
     }else {
       $response = array("status"=>"failed","description"=>"Don't have this group in database");
     }

@@ -3,6 +3,20 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 include "finduserid.php";
 
+function getgrouppict($con,$groupid){
+  $sqlgetpict = "SELECT  `icon` FROM  `group` WHERE  `group_id` =  '$groupid'";
+  $querygetpict = $con->query($sqlgetpict);
+  if($querygetpict ->num_rows >0){
+    $row = $querygetpict->fetch_assoc();
+    if($row['icon'] != ""){
+      return $row['icon'];
+    }else {
+      return "NULL";
+    }
+  }
+  return "NULL";
+}
+
 $sessionid = $con->real_escape_string($_GET['sessionid']);
 $type = $con->real_escape_string($_GET['type']);
 
@@ -41,6 +55,7 @@ if($userid != 0){
   $c_time = "";
   $to_groupid = "";
   $to_groupname = "";
+  $to_grouppict = "";
 
   if($queryallmsg->num_rows > 0){ //check ว่ามี record ออกมารึป่าว
       while($msgdata = $queryallmsg->fetch_assoc()){
@@ -62,6 +77,7 @@ if($userid != 0){
               $c_time = $msgdata["create_time"];
               $to_groupid = $msgdata["to_groupid"];
               $to_groupname = $msgdata["to_groupname"];
+              $to_grouppict = getgrouppict($con,$msgdata["to_groupid"]);
               $checkmsgid = $id_db;
           }
 
@@ -72,7 +88,7 @@ if($userid != 0){
           }else{
               //add element เข้า $msgdetail
               $msgdetail = array("id"=>$id_db,
-                                 "grouppath"=>$grouppath,
+                                //  "grouppath"=>$grouppath,
                                  "body"=>$body_db,
                                  "priority"=>$priority_db,
                                  "fromid"=>$fromid_db,
@@ -83,7 +99,8 @@ if($userid != 0){
                                  "date"=>$c_date,
                                  "time"=>$c_time,
                                  "to_id"=>$to_groupid,
-                                 "to_name"=>$to_groupname
+                                 "to_name"=>$to_groupname,
+                                 "to_grouppict"=>$to_grouppict
                                 );
               array_push($msg,$msgdetail);
               $grouppath = array();
@@ -111,12 +128,13 @@ if($userid != 0){
               $c_time = $msgdata["create_time"];
               $to_groupid = $msgdata["to_groupid"];
               $to_groupname = $msgdata["to_groupname"];
+              $to_grouppict = getgrouppict($con,$msgdata["to_groupid"]);
           }
       }
 
       //หลุด loop แล้วยังต้องเอาค่า id สุดท้ายเก็บลง $msgdetail
       $msgdetail = array("id"=>$id_db,
-                         "grouppath"=>$grouppath,
+                        //  "grouppath"=>$grouppath,
                          "body"=>$body_db,
                          "priority"=>$priority_db,
                          "fromid"=>$fromid_db,
@@ -127,7 +145,8 @@ if($userid != 0){
                          "date"=>$c_date,
                          "time"=>$c_time,
                          "to_id"=>$to_groupid,
-                         "to_name"=>$to_groupname
+                         "to_name"=>$to_groupname,
+                         "to_grouppict"=>$to_grouppict
                        );
               array_push($msg,$msgdetail);
 
