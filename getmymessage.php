@@ -14,7 +14,8 @@ $response = array("status"=>"failed","description"=>"some problems","message"=>$
 $userid = finduserid($sessionid,$con,$type);
 
 if($userid != 0){
-  $sql = "SELECT * FROM `message` WHERE `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid')";
+  $sql = "SELECT * FROM `message` WHERE `from_user_id` = '$userid'
+          AND `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid')";
   $queryselect = $con->query($sql);
   if($queryselect->num_rows>0){
 

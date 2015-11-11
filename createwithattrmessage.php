@@ -36,13 +36,26 @@ function isAdmin($groupid,$con,$userid){
   }
 }
 
-function createmessage($msgpayload,$priority,$userid,$con){
+function findgroupname($con,$groupid){
+  $sqlfindgroupname = "SELECT * FROM `group` WHERE `group_id` = '$groupid';";
+  $queryfindgroupname = $con->query($sqlfindgroupname);
+  if($queryfindgroupname ->num_rows > 0 ){
+    $row = $queryfindgroupname->fetch_assoc();
+    $groupname = $row['group_name'];
+    return $groupname;
+  }else{
+    return "";
+  }
+}
+
+function createmessage($msgpayload,$priority,$userid,$con,$groupid){
   $identity = generateRandomString();
   $c_date = date("Y-m-d");
   $c_time = date("h:i:sa");
+  $groupname = findgroupname($con,$groupid);
   $sql = "INSERT INTO  `workingalert`.`message`
-          (`message_body` ,`priority` ,`from_user_id` ,`identity` ,`create_date` ,`create_time`)
-          VALUES ('$msgpayload',  '$priority',  '$userid', '$identity', '$c_date', '$c_time');";
+          (`message_body` ,`priority` ,`from_user_id` ,`identity` ,`create_date` ,`create_time`, `to_groupid`, `to_groupname`)
+          VALUES ('$msgpayload',  '$priority',  '$userid', '$identity', '$c_date', '$c_time', '$groupid', '$groupname');";
   if($con->query($sql)===TRUE){
           $querymsgid = $con->query("SELECT `message_id` FROM `workingalert`.`message`
                               WHERE `from_user_id` = '$userid'
@@ -256,7 +269,7 @@ if($userid != 0){
     if($querycheckgroup ->num_rows > 0 ){
       while ($row = $querycheckgroup->fetch_assoc()) {
         if($row['permission'] == '1' || $row['permission'] == NULL){ //everyone can send
-           $msgid = createmessage($msgpayload,$priority,$userid,$con);
+           $msgid = createmessage($msgpayload,$priority,$userid,$con,$groupid);
            if($msgid == 0){
              $response = array("status"=>"failed","description"=>"insert messege to db failed");
            }else{
@@ -275,7 +288,7 @@ if($userid != 0){
            }
         }elseif ($row['permission'] == '2') { //only admin can send
           if(isAdmin($groupid,$con,$userid)){
-            $msgid = createmessage($msgpayload,$priority,$userid,$con);
+            $msgid = createmessage($msgpayload,$priority,$userid,$con,$groupid);
             if($msgid == 0){
               $response = array("status"=>"failed","description"=>"insert messege to db failed");
             }else{
