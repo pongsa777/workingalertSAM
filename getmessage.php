@@ -9,11 +9,24 @@ include "finduserid.php";
 
 
 $msg = array();
-$groupname = "";
-$response = array("status"=>"failed","description"=>"some problems","message"=>$msg);
+$group = array();
+
+$response = array("status"=>"failed","description"=>"some problems","groupdetail"=>$group,"message"=>$msg);
 $userid = finduserid($sessionid,$con,$type);
 
 if($userid != 0){
+  //get this group detail [name,id,icon];
+  $sqlgroupdetail = "SELECT * FROM `group` WHERE `group_id` = '$groupid'";
+  $querygroup = $con->query($sqlgroupdetail);
+  $groupdetail = $querygroup->fetch_assoc();
+  $toinsertgroup = array(
+                          "id"=>$groupdetail['group_id'],
+                          "name"=>$groupdetail["group_name"]
+                        );
+  array_push($group,$toinsertgroup);
+
+  $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg);
+
   $sql = "SELECT * FROM `message` WHERE `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid')";
   $queryselect = $con->query($sql);
   if($queryselect->num_rows>0){
@@ -33,6 +46,7 @@ if($userid != 0){
       $has_message = $queryhas_message->fetch_assoc();
 
 
+
       $msgdetail = array(
                           "id"=>$row["message_id"],
                           "body"=>$row["message_body"],
@@ -43,17 +57,21 @@ if($userid != 0){
                           "read"=>$has_message["read_status"],
                           "reach"=>$has_message["reach_status"],
                           "date"=>$row["create_date"],
-                          "time"=>$row["create_time"]
+                          "time"=>$row["create_time"],
+                          "fromgroupid"=>$groupdetail["group_id"],
+                          "icon"=>$groupdetail["icon"]
                         );
       array_push($msg,$msgdetail);
     }
 
-    $response = array("status"=>"success","description"=>"your message","message"=>$msg);
+
+
+    $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg);
   }
 
 }else{
     //not found user_id
-    $response = array("status"=>"failed","description"=>"invalid session id","message"=>$msg);
+    $response = array("status"=>"failed","description"=>"invalid session id","groupdetail"=>$group,"message"=>$msg);
 }
 
 echo json_encode($response);

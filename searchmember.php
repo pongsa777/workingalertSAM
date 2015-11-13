@@ -6,6 +6,7 @@ include "finduserid.php";
 $sessionid = $con->real_escape_string($_GET['sessionid']);
 $type = $con->real_escape_string($_GET['type']);
 $searchmsg = $con->real_escape_string($_GET['searchmsg']);
+$groupid = $con->real_escape_string($_GET['groupid']);
 
 $result = array();
 $response = array("status"=>"failed","description"=>"some problems");
@@ -13,11 +14,12 @@ $userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
   if($searchmsg != ""){
     $sqlsearch = "SELECT * FROM `user`
-                  WHERE `firstname` like '$searchmsg%'
+                  WHERE (`firstname` like '$searchmsg%'
                   OR `lastname` like '$searchmsg%'
                   OR `nickname` like '$searchmsg%'
                   OR `phone` like '$searchmsg%'
-                  OR `email` like '$searchmsg%'
+                  OR `email` like '$searchmsg%')
+                  AND `user`.`user_id` NOT IN (SELECT `user_id` FROM `has_user` WHERE `group_id` = '$groupid')
                   LIMIT 0,50";
     $queryresult = $con->query($sqlsearch);
     if($queryresult->num_rows > 0){
