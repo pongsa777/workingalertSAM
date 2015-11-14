@@ -20,11 +20,11 @@ function isadmin($con,$groupid,$userid){
 }
 
 function islastadmin($con,$groupid){
-  $sqllastadmin = "SELECT COUNT(`id`) FROM `has_user` WHERE `group_id` = '$groupid' AND `role_id` = 1";
+  $sqllastadmin = "SELECT COUNT(`id`) AS 'countadmin' FROM `has_user` WHERE `group_id` = '$groupid' AND `role_id` = 1";
   $querylastadmin = $con->query($sqllastadmin);
   if($querylastadmin->num_rows>0){
     while($row = $querylastadmin->fetch_assoc()){
-      if($row[" COUNT(`id`) "] <= 1){
+      if($row["countadmin"] <= 1){
         return true;
       }else{
         return false;
@@ -52,28 +52,28 @@ $groupid = $con->real_escape_string($_GET['groupid']);
 $response = array("status"=>"failed","description"=>"some problems");
 $userid = finduserid($sessionid,$con,$type);
 if($userid != 0){
-
-  //check ว่าเป็น user หรือ admin
-  if( isadmin($con,$groupid,$userid) ){
-
-    //ดูว่าเป็น admin คนสุดท้ายรึป่าว?
-    if( islastadmin($con,$groupid) ){
-      $response = array("status"=>"failed","description"=>"You are the last admin of this group");
-    }else {
-      if( leavethisgroup($con,$groupid,$userid) ){
-        $response = array("status"=>"success","description"=>"leave group success");
-      }else {
-        $response = array("status"=>"failed","description"=>"leave group failed");
+  if($groupid != ""){
+      //check ว่าเป็น user หรือ admin
+      if( isadmin($con,$groupid,$userid) ){
+        //ดูว่าเป็น admin คนสุดท้ายรึป่าว?
+        if( islastadmin($con,$groupid) ){
+          $response = array("status"=>"failed","description"=>"You are the last admin of this group");
+        }else {
+          if( leavethisgroup($con,$groupid,$userid) ){
+              $response = array("status"=>"success","description"=>"leave group success");
+          }else {
+              $response = array("status"=>"failed","description"=>"leave group failed");
+          }
+        }
+      }else{
+      //member ออกกรุ๊ปได้เลย
+        if( leavethisgroup($con,$groupid,$userid) ){
+            $response = array("status"=>"success","description"=>"leave group success");
+            }else {
+            $response = array("status"=>"failed","description"=>"leave group failed");
+            }
       }
     }
-  }else{
-    //member ออกกรุ๊ปได้เลย
-    if( leavethisgroup($con,$groupid,$userid) ){
-      $response = array("status"=>"success","description"=>"leave group success");
-    }else {
-      $response = array("status"=>"failed","description"=>"leave group failed");
-    }
-  }
 }else{
   $response = array("status"=>"failed","description"=>"wrong session id");
 }

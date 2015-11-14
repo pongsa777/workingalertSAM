@@ -3,6 +3,42 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 include "finduserid.php";
 
+function getmystatus($con,$userid,$groupid){
+  $status = "";
+  $sqlgetmystat = "SELECT * FROM `has_user` WHERE `user_id` = '$userid' AND `group_id` = '$groupid'";
+  $querygetmystat = $con->query($sqlgetmystat);
+  if($querygetmystat->num_rows>0){
+    $row = $querygetmystat->fetch_assoc();
+      if( $row['role_id'] == 1 ){
+        $status = "admin";
+      }elseif ($row['role_id'] == 2) {
+        $status = "member";
+      }elseif ($row['role_id'] == 3) {
+        $status = "block";
+      }elseif ($row['role_id'] == 4) {
+        $status = "pending admin approve";
+      }elseif ($row['role_id'] == 5) {
+        $status = "pending user confirm";
+      }else{
+        $status = "error";
+      }
+  }else{
+    $status = "error";
+  }
+  return $status;
+}
+
+function checkapprove($con,$groupid){
+  $permiss = -1;
+  $sqlapprove = "SELECT * FROM `group` WHERE `group_id` = '$groupid'";
+  $querycheckapprove = $con->query($sqlapprove);
+  if( $querycheckapprove -> num_rows > 0 ){
+    $dataa = $querycheckapprove->fetch_assoc();
+    $permiss = $dataa['permission'];
+    return $permiss;
+  }
+}
+
     $sessionid = $con->real_escape_string($_GET['sessionid']);
     $groupid = $con->real_escape_string($_GET['groupid']);
     $type = $con->real_escape_string($_GET['type']);
@@ -10,8 +46,9 @@ include "finduserid.php";
 
 $msg = array();
 $group = array();
+$cansend = "no";
 
-$response = array("status"=>"failed","description"=>"some problems","groupdetail"=>$group,"message"=>$msg);
+$response = array("status"=>"failed","description"=>"some problems","groupdetail"=>$group,"message"=>$msg,"can_send"=>$cansend);
 $userid = finduserid($sessionid,$con,$type);
 
 if($userid != 0){
@@ -25,7 +62,7 @@ if($userid != 0){
                         );
   array_push($group,$toinsertgroup);
 
-  $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg);
+  $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg,"can_send"=>$cansend);
 
   $sql = "SELECT * FROM `message` WHERE `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid')";
   $queryselect = $con->query($sql);
@@ -65,13 +102,21 @@ if($userid != 0){
     }
 
 
-
-    $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg);
+    $mystatus = getmystatus($con,$userid,$groupid);
+    if($mystatus == "admin"){
+      $cansend = "yes";
+    }else{
+      //check approve
+      if( $mystatus == "member" && checkapprove($con,$groupid) == 1 ){
+        $cansend = "yes";
+      }
+    }
+    $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg,"can_send"=>$cansend);
   }
 
 }else{
     //not found user_id
-    $response = array("status"=>"failed","description"=>"invalid session id","groupdetail"=>$group,"message"=>$msg);
+    $response = array("status"=>"failed","description"=>"invalid session id","groupdetail"=>$group,"message"=>$msg,"can_send"=>$cansend);
 }
 
 echo json_encode($response);

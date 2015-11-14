@@ -3,10 +3,10 @@ header('Content-Type: application/json');
 include "dbconnect.php";
 include "finduserid.php";
 
-$groupid = $con->real_escape_string($_GET['groupid']);
-$pass = $con->real_escape_string($_GET['pass']);
-$sessionid = $con->real_escape_string($_GET['sessionid']);
-$type = $con->real_escape_string($_GET['type']);
+  $groupid = $con->real_escape_string($_GET['groupid']);
+  $pass = $con->real_escape_string($_GET['pass']);
+  $sessionid = $con->real_escape_string($_GET['sessionid']);
+  $type = $con->real_escape_string($_GET['type']);
 
 $userid = finduserid($sessionid,$con,$type);
 $response = array("status"=>"failed","description"=>"missing parameters");
@@ -17,7 +17,7 @@ if($userid != 0){ //หา user id
     $row = $checkpassdata->fetch_assoc();
     if ($row["password"] == $pass){ // ใส่พาสถูกต้อง
       if ($row["approve"] != "" || $row["approve"] != NULL) { //  เช็คเป็นกลุ่มที่ต้องรอ admin กดรับ
-        $sql = "INSERT INTO `workingalert`.`has_user` (`user_id`, `group_id`, `role_id`) VALUES ('$userid', '$groupid', 0);";
+        $sql = "INSERT INTO `workingalert`.`has_user` (`user_id`, `group_id`, `role_id`) VALUES ('$userid', '$groupid', 4);";
         if($con->query($sql)=== true){
           $response = array("status"=>"success","description"=>"waiting admin for approve");
         }else {

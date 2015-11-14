@@ -18,7 +18,7 @@ if($userid != 0){
     $querycheckadmin = $con->query($sqlcheckadmin);
     if ($querycheckadmin->num_rows > 0) {
       //เช็คว่า memberid เป็นสถานะ member จริง
-      $sqlcheckmember = "SELECT * FROM `has_user` WHERE (`role_id` = '2' OR `role_id` = '4') AND `user_id` = '$memberid' AND `has_user`.`group_id` = '$groupid'";
+      $sqlcheckmember = "SELECT * FROM `has_user` WHERE (`role_id` = '2' OR `role_id` = '4' OR `role_id` = '3') AND `user_id` = '$memberid' AND `has_user`.`group_id` = '$groupid'";
       $querycheckmember = $con->query($sqlcheckmember);
       if ($querycheckmember->num_rows > 0) {
         $sqlupdatestatus = "DELETE FROM `workingalert`.`has_user` WHERE `has_user`.`user_id` = '$memberid' ";

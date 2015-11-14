@@ -17,7 +17,7 @@ if($userid != 0){
     if($checkdata->num_rows > 0){
         $checkdatastatus = $checkdata->fetch_assoc();
         if($checkdatastatus['role_id'] == '0'){
-          $response = array("status"=>"failed","description"=>"waiting admin for approve");
+          $response = array("status"=>"failed","description"=>"your status is waiting admin for approve");
         }else if($checkdatastatus['role_id'] == '1'){
           $response = array("status"=>"failed","description"=>"you are admin in this group");
         }else {
@@ -31,7 +31,7 @@ if($userid != 0){
             if ($row["password"] != "") { //ถ้ามีพาสเวิร์ดส่งไปว่าต้องไปหน้ากรอกพาส
               $response = array("status"=>"password","description"=>"go to password page");
             }elseif ($row["approve"] != "" || $row["approve"] != NULL) { //เชคว่ากลุ่มมีการรอรับจาก admin รึป่าว
-              $sql = "INSERT INTO `workingalert`.`has_user` (`user_id`, `group_id`, `role_id`) VALUES ('$userid', '$groupid', 0);";
+              $sql = "INSERT INTO `workingalert`.`has_user` (`user_id`, `group_id`, `role_id`) VALUES ('$userid', '$groupid', 4);";
               if($con->query($sql)=== true){
                 $response = array("status"=>"success","description"=>"waiting admin for approve");
               }else {
