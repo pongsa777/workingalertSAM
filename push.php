@@ -10,12 +10,17 @@ $registrationIds = $arrayOfDeviceId;
 // prep the bundle
 $msg = array
 (
-    'message'       => $msg,
-    'title'         => $title,
+    'message'       => $msg.$title,
+    'title'         => 'WorkingAlert!!',
     'subtitle'      => 'This is a subtitle. subtitle',
     'tickerText'    => 'Ticker text here...Ticker text here...Ticker text here',
-    'vibrate'   => 1,
-    'sound'     => 1
+    'vibrate'   => true,
+    'sound'     => true,
+    'image' 	=> 'www/img/icon.png',
+    'style'		=> "inbox",
+    'summaryText' => "There are %n% notifications",
+    'soundname' 	=> 'alert.mp3'
+    
 );
 
 $fields = array

@@ -56,7 +56,7 @@ if($userid != 0){
     `message`.`to_groupname`
     FROM  `has_message`
     JOIN  `message` ON  `has_message`.`message_id` =  `message`.`message_id`
-    WHERE  `has_message`.`user_id` = '5'
+    WHERE  `has_message`.`user_id` = '$userid'
     ORDER BY  `message`.`message_id` DESC, CHAR_LENGTH(`has_message`.`pathmsg`)
 	");
     $checkmsgid = 0;

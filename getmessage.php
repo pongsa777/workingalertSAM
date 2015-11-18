@@ -64,7 +64,7 @@ if($userid != 0){
 
   $response = array("status"=>"success","description"=>"your message","groupdetail"=>$group,"message"=>$msg,"can_send"=>$cansend);
 
-  $sql = "SELECT * FROM `message` WHERE `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid')";
+  $sql = "SELECT * FROM `message` WHERE `message_id` in (SELECT `message_id` FROM `has_message` WHERE `group_id` = '$groupid') ORDER BY  `message`.`message_id` DESC  ";
   $queryselect = $con->query($sql);
   if($queryselect->num_rows>0){
 
